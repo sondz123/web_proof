@@ -7,11 +7,21 @@ const router = express.Router()
 //Lấy danh sách minh chứng
 router.get('/proof/list', async(req, res, next) => {
     try {
-
-       const listProof = await Proof.find({}).skip(1);
-       if(listProof){
-        res.status(201).send( {listProof} ); 
-       }
+        let perPage = 2; // số lượng sản phẩm xuất hiện trên 1 page
+        let page = req.params.page || 1; 
+       const listProof = await Proof.find()
+       .skip((perPage * page) - perPage) 
+       .limit(perPage)
+       .exec((err, listProof) => {
+        Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
+            if (err) return next(err);
+            let ObjResult = {
+                "count" : count,
+                "listProof" : listProof
+            }
+            res.send(ObjResult) 
+          });
+       });
     }catch(error){
         res.send(error)
     }
