@@ -22,7 +22,9 @@ app.post('/api/upload', (req, res, next) => {
       next(err);
       return;
     }
-    res.json({ fields, files });
+    // files.someExpressFiles.filepath.replace(/\\/g, "\\\\");
+    // console.log(files.someExpressFiles.filepath);
+    res.json({ files });
   });
 });
 
@@ -30,7 +32,3 @@ app.listen(3000, () => {
   console.log('Server listening on http://localhost:3000 ...');
 });
 
-const  son  = {
-  "name" : "son"
-}
-console.log(son);

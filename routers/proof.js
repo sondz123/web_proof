@@ -3,11 +3,12 @@ const express = require('express')
 const Proof = require('../models/proofModel')
 
 const router = express.Router()
-//test git
-//Lấy danh sách minh chứng
+
+//Lấy danh sách minh chứng  
 router.get('/proof/list', async(req, res, next) => {
     try {
-        let perPage = 2; // số lượng sản phẩm xuất hiện trên 1 page
+        //dieu kien loc
+        let perPage = req.params.perPage || 10; // số lượng sản phẩm xuất hiện trên 1 page
         let page = req.params.page || 1; 
        const listProof = await Proof.find()
        .skip((perPage * page) - perPage) 
@@ -16,10 +17,10 @@ router.get('/proof/list', async(req, res, next) => {
         Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
             if (err) return next(err);
             let ObjResult = {
-                "count" : count,
+                "total" : count,
                 "listProof" : listProof
             }
-            res.send(ObjResult) 
+            res.json(ObjResult) 
           });
        });
     }catch(error){
@@ -32,9 +33,11 @@ router.get('/proof/list', async(req, res, next) => {
 router.post('/proof/create', async (req, res) => {
     // Create a new proof
     try {
+        
+
         const proof = new Proof(req.body)
         await proof.save()
-        res.status(201).send({ proof })
+        res.status(201).json({ proof })
     } catch (error) {
         res.status(400).send(error)
     }
@@ -62,6 +65,18 @@ router.delete('/proof/delete/:id', async (req, res) => {
         let idProof = req.params.id;
 
         await Proof.remove({"_id": Object(idProof)})
+        res.status(201).send("Xóa thành công")
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
+
+//Lọc minh chứng
+router.get('/proof/filter', async (req, res) => {
+    try {
+        let tieu_chi = req.params.tieu_chi;
+
+        await Proof.find({})
         res.status(201).send("Xóa thành công")
     } catch (error) {
         res.status(400).send(error)

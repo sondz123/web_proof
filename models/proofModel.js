@@ -27,10 +27,43 @@ const proofSchema = mongoose.Schema({
         type: String,
         trim: true
     },
-    cap_quyen_don_vi: {
-        type: Object,
-        trim: true
+    nhom_don_vi: {
+        type: Object
     },
+    don_vi: {
+        type: Object
+    },
+    chuong_trinh : {
+        type: Object
+    },
+    attachment: {
+        type: Array
+    },
+    block_tieu_chuan_1: {
+        tieu_chuan: {
+           type: Object
+        },
+        tieu_chi: {
+            type: Array
+         }
+    },
+    block_tieu_chuan_2: {
+        tieu_chuan: {
+           type: Object
+        },
+        tieu_chi: {
+            type: Array
+         }
+    },
+    block_tieu_chuan_3: {
+        tieu_chuan: {
+           type: Object
+        },
+        tieu_chi: {
+            type: Array
+         }
+    }
+
 });
 
 const Proof = mongoose.model('Proof', proofSchema)
