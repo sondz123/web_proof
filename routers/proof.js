@@ -1,7 +1,8 @@
 const express = require('express')
 
 const Proof = require('../models/proofModel')
-
+const countRecordModel = require('../models/countRecord')
+const { count } = require('../models/proofModel')
 const router = express.Router()
 
 //Lấy danh sách minh chứng  
@@ -20,7 +21,7 @@ router.get('/proof/list', async(req, res, next) => {
                 "total" : count,
                 "listProof" : listProof
             }
-            res.json(ObjResult) 
+            res.status(200).json(ObjResult) 
           });
        });
     }catch(error){
@@ -33,13 +34,30 @@ router.get('/proof/list', async(req, res, next) => {
 router.post('/proof/create', async (req, res) => {
     // Create a new proof
     try {
+        let countRecord = await countRecordModel.findOne({})
+        let count = 0;
+        if(countRecord){
+            count = countRecord.count
+        }else {
+            const countRecord = new countRecordModel({"count" : 0})
+            await countRecord.save()
+        }
 
+        const proof = new Proof(req.body);
+        let tieu_chuan = req.body.block_tieu_chuan_1.tieu_chuan.key || 1;
+        let tieu_chi = req.body.block_tieu_chuan_1.tieu_chi[0].key || 1;
 
-        const proof = new Proof(req.body)
-        await proof.save()
-        res.status(201).json({ proof })
+        proof.code  = "" + tieu_chuan + "." + tieu_chi + "." + count ;
+        
+        Promise.all([await proof.save(), 
+            await countRecordModel.updateOne({}, {$set : {count : count + 1}})])
+        
+        res.status(201).json({ 
+         data: proof,
+         message : "Thêm mới thành công"
+        })
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({message : "Thêm mới thất bại"})
     }
 })
 
@@ -75,6 +93,12 @@ router.delete('/proof/delete/:id', async (req, res) => {
 router.get('/proof/filter', async (req, res) => {
     try {
         let tieu_chi = req.params.tieu_chi;
+
+        let optionFind = {
+            "block_tieu_chuan_1.tieu_chi.key" : {$ne : tieu_chi},
+            "block_tieu_chuan_2.tieu_chi.key" : {$ne : tieu_chi},
+            "block_tieu_chuan_3.tieu_chi.key" : {$ne : tieu_chi},
+    }
 
         await Proof.find({})
         res.status(201).send("Xóa thành công")

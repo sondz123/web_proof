@@ -11,7 +11,7 @@ const proofSchema = mongoose.Schema({
         trim: true
     },
     cap_ban_hanh: {
-        type: String,
+        type: Object,
         trim: true
     },
     so_van_ban: {
