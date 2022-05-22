@@ -13,21 +13,27 @@ app.use(express.json())
 
 app.use([userRouter, proofRouter])
 app.use(upload())
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html")
-})
 
-app.post("/", (req,res) => {
+
+app.post("/upload/file", (req,res) => {
     if(req.files){
         let file = req.files.file;
         let fileName = file.name;
-        console.log(fileName);
+        let uploadPath = __dirname + "./uploads/" + fileName;
 
-        file.mv('./uploads/'+ fileName, (err) => {
+        file.mv(uploadPath, (err) => {
             if(err){
                 res.send(err);
             }else {
-                res.send("File uploaded")
+                let dataFile = {
+                    name: fileName,
+                    size:  file.size,
+                    path: uploadPath
+                }
+                res.json({
+                    message :"File uploaded",
+                    dataFile: dataFile
+                })
             }
         })
     }

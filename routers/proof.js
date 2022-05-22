@@ -33,7 +33,7 @@ router.get('/proof/list', async(req, res, next) => {
 router.post('/proof/create', async (req, res) => {
     // Create a new proof
     try {
-        
+
 
         const proof = new Proof(req.body)
         await proof.save()
@@ -82,5 +82,8 @@ router.get('/proof/filter', async (req, res) => {
         res.status(400).send(error)
     }
 })
+
+
+
 
 module.exports = router
