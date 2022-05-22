@@ -100,7 +100,7 @@ router.get('/proof/filter', async (req, res) => {
             "block_tieu_chuan_3.tieu_chi.key" : {$ne : tieu_chi},
     }
 
-        await Proof.find({})
+        await Proof.find({optionFind})
         res.status(201).send("Xóa thành công")
     } catch (error) {
         res.status(400).send(error)
