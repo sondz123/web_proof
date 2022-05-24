@@ -5,13 +5,62 @@ const countRecordModel = require('../models/countRecord')
 const { count } = require('../models/proofModel')
 const router = express.Router()
 
+
+const  bodauTiengViet = function (str) {
+    if (str != null) {
+        str = str.toString();
+        str = str.toLowerCase();
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ|à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a").replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ|à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ|è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e").replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ|è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ|ì|í|ị|ỉ|ĩ/g, "i").replace(/ì|í|ị|ỉ|ĩ|ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ|ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o").replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ|ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ|ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u").replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ|ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ|ỳ|ý|ỵ|ỷ|ỹ/g, "y").replace(/ỳ|ý|ỵ|ỷ|ỹ|ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ|đ/g, "d").replace(/đ|đ/g, "d");
+        str = str.replace(/[^a-zA-Z0-9]/g, '_');
+        return str;
+    }
+    else { return ""; }
+}
+
+
 //Lấy danh sách minh chứng  
-router.get('/proof/list', async(req, res, next) => {
+router.post('/proof/list', async(req, res, next) => {
     try {
         //dieu kien loc
-        let perPage = req.params.perPage || 10; // số lượng sản phẩm xuất hiện trên 1 page
-        let page = req.params.page || 1; 
-       const listProof = await Proof.find()
+        let perPage = req.body.perPage || 10; // số lượng sản phẩm xuất hiện trên 1 page
+        let page = req.body.page || 1; 
+
+
+        let name = req.body.name;
+        
+        var optionFind = {};
+
+        if(req.body.name){
+            optionFind["namekd"] = {"$regex": bodauTiengViet(name)};
+        }
+        if(req.body.cap_ban_hanh){
+            optionFind["cap_ban_hanh.key"] = req.body.cap_ban_hanh;
+        }
+        if(req.body.tieu_chuan){
+            optionFind["$or"] = [
+                { "block_tieu_chuan_1.tieu_chuan.key" : req.body.tieu_chuan },
+                { "block_tieu_chuan_2.tieu_chuan.key" : req.body.tieu_chuan },
+                { "block_tieu_chuan_3.tieu_chuan.key" : req.body.tieu_chuan }
+             ]
+        }
+        if(req.body.tieu_chi){
+            optionFind["$and"] = [
+                {"$or" : [
+                    {"block_tieu_chuan_1.tieu_chi.key" : req.body.tieu_chi},
+                    {"block_tieu_chuan_2.tieu_chi.key" : req.body.tieu_chi},
+                    {"block_tieu_chuan_3.tieu_chi.key" : req.body.tieu_chi}
+                ]}
+            ]
+        }
+        
+        console.log(optionFind)
+        const listProof = await Proof.find(optionFind)
        .skip((perPage * page) - perPage) 
        .limit(perPage)
        .exec((err, listProof) => {
@@ -19,7 +68,8 @@ router.get('/proof/list', async(req, res, next) => {
             if (err) return next(err);
             let ObjResult = {
                 "total" : count,
-                "listProof" : listProof
+                "listProof" : listProof,
+                
             }
             res.status(200).json(ObjResult) 
           });
@@ -35,14 +85,15 @@ router.post('/proof/create', async (req, res) => {
     // Create a new proof
     try {
         let countRecord = await countRecordModel.findOne({})
-        let count = 0;
+        let count = 1;
         if(countRecord){
             count = countRecord.count
         }else {
-            const countRecord = new countRecordModel({"count" : 0})
+            const countRecord = new countRecordModel({"count" : 1})
             await countRecord.save()
         }
 
+        req.body.namekd = bodauTiengViet(req.body.name)
         const proof = new Proof(req.body);
         let tieu_chuan = req.body.block_tieu_chuan_1.tieu_chuan.key || 1;
         let tieu_chi = req.body.block_tieu_chuan_1.tieu_chi[0].key || 1;
@@ -106,7 +157,6 @@ router.get('/proof/filter', async (req, res) => {
         res.status(400).send(error)
     }
 })
-
 
 
 

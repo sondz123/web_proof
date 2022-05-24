@@ -62,7 +62,8 @@ const proofSchema = mongoose.Schema({
         tieu_chi: {
             type: Array
          }
-    }
+    },
+    namekd: String
 
 });
 
