@@ -63,7 +63,9 @@ const proofSchema = mongoose.Schema({
             type: Array
          }
     },
-    namekd: String
+    namekd: String,
+    createdAt: {type: Date, default: Date.now},
+    updatedAt: {type: Date, default: Date.now}
 
 });
 

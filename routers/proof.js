@@ -58,9 +58,8 @@ router.post('/proof/list', async(req, res, next) => {
                 ]}
             ]
         }
-        
-        console.log(optionFind)
-        const listProof = await Proof.find(optionFind)
+    
+        await Proof.find(optionFind)
        .skip((perPage * page) - perPage) 
        .limit(perPage)
        .exec((err, listProof) => {
