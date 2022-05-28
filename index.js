@@ -50,7 +50,7 @@ app.post("/upload/file", (req, res) => {
 
 
 //app.use()
-const port = 3000;
+const port = 3005;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
 })

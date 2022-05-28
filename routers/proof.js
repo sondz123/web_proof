@@ -58,13 +58,15 @@ router.post('/proof/list', async(req, res, next) => {
                 ]}
             ]
         }
-    
-        await Proof.find(optionFind)
+
+        await Proof.find(optionFind).sort({"createdAt" : -1})
        .skip((perPage * page) - perPage) 
        .limit(perPage)
        .exec((err, listProof) => {
+        console.log(listProof)
         Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
             if (err) return next(err);
+            
             let ObjResult = {
                 "total" : count,
                 "listProof" : listProof,
@@ -99,15 +101,14 @@ router.post('/proof/create', async (req, res) => {
 
         proof.code  = "" + tieu_chuan + "." + tieu_chi + "." + count ;
         
-        Promise.all([await proof.save(), 
-            await countRecordModel.updateOne({}, {$set : {count : count + 1}})])
+        Promise.all([await proof.save(), await countRecordModel.updateOne({}, {$set : {count : count + 1}})])
         
         res.status(201).json({ 
          data: proof,
          message : "Thêm mới thành công"
         })
     } catch (error) {
-        res.status(400).send({message : "Thêm mới thất bại"})
+        res.status(400).send({message : error})
     }
 })
 
@@ -140,9 +141,9 @@ router.delete('/proof/delete/:id', async (req, res) => {
 })
 
 //Lọc minh chứng
-router.get('/proof/filter', async (req, res) => {
+router.post('/proof/filter', async (req, res) => {
     try {
-        let tieu_chi = req.params.tieu_chi;
+        let tieu_chi = req.body.tieu_chi;
 
         let optionFind = {
             "block_tieu_chuan_1.tieu_chi.key" : {$ne : tieu_chi},

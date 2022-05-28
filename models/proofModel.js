@@ -19,9 +19,7 @@ const proofSchema = mongoose.Schema({
         trim: true
     },
     ngay_ban_hanh: {
-        type: Number,
-        trim: true,
-
+        type: {type: Date, default: Date.now} 
     },
     ghi_chu: {
         type: String,

@@ -36,6 +36,7 @@ router.post('/users/login', async(req, res) => {
     //Login a registered user
     try {
         const { email, password } = req.body
+
         const user = await User.findByCredentials(email, password)
         if (!user) {
             return res.status(401).send({error: 'Login failed! Check authentication credentials'})
@@ -72,6 +73,16 @@ router.post('/users/me/logoutall', auth, async(req, res) => {
         await req.user.save()
         res.send()
     } catch (error) {
+        res.status(500).send(error)
+    }
+})
+
+
+router.get('/users/getall', async(req, res) => {
+    try{
+        let listUser = await User.find({})
+        res.status(500).send(listUser)
+    } catch(error){
         res.status(500).send(error)
     }
 })
