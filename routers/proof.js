@@ -97,8 +97,8 @@ router.post('/proof/create', async (req, res) => {
         const proof = new Proof(req.body);
         let tieu_chuan = req.body.block_tieu_chuan_1.tieu_chuan.key || 1;
         let tieu_chi = req.body.block_tieu_chuan_1.tieu_chi[0].key || 1;
-
-        proof.code  = "" + tieu_chuan + "." + tieu_chi + "." + count ;
+        let chuonng_trinh = req.body.chuonng_trinh.key || 1;
+        proof.code  = "" + chuonng_trinh + tieu_chuan + "." + tieu_chi + "." + count ;
         
         Promise.all([await proof.save(), await countRecordModel.updateOne({}, {$set : {count : count + 1}})])
         

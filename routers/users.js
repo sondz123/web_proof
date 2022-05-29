@@ -92,7 +92,7 @@ router.delete('/users/delete/:id', async (req, res) => {
     try {
         let idUser = req.params.id;
 
-        await Proof.remove({"_id": Object(idUser)})
+        await User.remove({"_id": Object(idUser)})
         res.status(201).send("Xóa thành công")
     } catch (error) {
         res.status(400).send(error)
