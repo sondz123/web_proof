@@ -63,7 +63,6 @@ router.post('/proof/list', async(req, res, next) => {
        .skip((perPage * page) - perPage) 
        .limit(perPage)
        .exec((err, listProof) => {
-        console.log(listProof)
         Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
             if (err) return next(err);
             
@@ -144,14 +143,31 @@ router.delete('/proof/delete/:id', async (req, res) => {
 router.post('/proof/filter', async (req, res) => {
     try {
         let tieu_chi = req.body.tieu_chi;
+        let tieu_chuan = req.body.tieu_chuan;
+        let chuong_trinh = req.body.chuong_trinh;
+        let optionFind = {};
+        
 
-        let optionFind = {
-            "block_tieu_chuan_1.tieu_chi.key" : {$ne : tieu_chi},
-            "block_tieu_chuan_2.tieu_chi.key" : {$ne : tieu_chi},
-            "block_tieu_chuan_3.tieu_chi.key" : {$ne : tieu_chi},
+        if(tieu_chuan){
+            optionFind["$or"] = [
+                { "block_tieu_chuan_1.tieu_chuan.key" : req.body.tieu_chuan },
+                { "block_tieu_chuan_2.tieu_chuan.key" : req.body.tieu_chuan },
+                { "block_tieu_chuan_3.tieu_chuan.key" : req.body.tieu_chuan }
+             ]
         }
-
-        let list  = await Proof.find({optionFind})
+        if(tieu_chi){
+            optionFind["$and"] = [
+                {"$or" : [
+                    {"block_tieu_chuan_1.tieu_chi.key" : tieu_chi},
+                    {"block_tieu_chuan_2.tieu_chi.key" : tieu_chi},
+                    {"block_tieu_chuan_3.tieu_chi.key" : tieu_chi}
+                ]}
+            ]
+        }
+        if(chuong_trinh){
+            optionFind["chuong_trinh.key"] = chuong_trinh;
+        }
+        let list  = await Proof.find(optionFind)
         res.status(201).send(list)
     } catch (error) {
         res.status(400).send(error)

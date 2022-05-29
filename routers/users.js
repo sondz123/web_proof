@@ -87,6 +87,16 @@ router.get('/users/getall', async(req, res) => {
     }
 })
 
+//Xóa minh chứng
+router.delete('/users/delete/:id', async (req, res) => {
+    try {
+        let idUser = req.params.id;
 
+        await Proof.remove({"_id": Object(idUser)})
+        res.status(201).send("Xóa thành công")
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
 
 module.exports = router;
