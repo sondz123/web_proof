@@ -81,7 +81,7 @@ router.post('/users/me/logoutall', auth, async(req, res) => {
 router.get('/users/getall', async(req, res) => {
     try{
         let listUser = await User.find({})
-        res.status(500).send(listUser)
+        res.status(200).send(listUser)
     } catch(error){
         res.status(500).send(error)
     }
