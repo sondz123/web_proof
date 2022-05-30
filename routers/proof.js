@@ -171,7 +171,7 @@ router.post('/proof/filter', async (req, res) => {
         if(chuong_trinh){
             optionFind["chuong_trinh.key"] = chuong_trinh;
         }
-        let list  = await Proof.find(optionFind)
+        let list  = await Proof.find(optionFind).sort({"createdAt" : -1})
         res.status(201).send(list)
     } catch (error) {
         res.status(400).send(error)
