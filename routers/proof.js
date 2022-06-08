@@ -42,6 +42,9 @@ router.post('/proof/list', async(req, res, next) => {
         if(req.body.cap_ban_hanh){
             optionFind["cap_ban_hanh.key"] = req.body.cap_ban_hanh;
         }
+        if(req.body.don_vi){
+            optionFind["don_vi.key"] = req.body.don_vi;
+        }
         if(req.body.tieu_chuan){
             optionFind["$or"] = [
                 { "block_tieu_chuan_1.tieu_chuan.key" : req.body.tieu_chuan },

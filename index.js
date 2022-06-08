@@ -27,7 +27,7 @@ app.post("/upload/file", (req, res) => {
     if (req.files) {
         let file = req.files.file;
         let fileName = file.name;
-        let uploadPath = __dirname + "./uploads/" + fileName;
+        let uploadPath = __dirname + "/uploads/" + fileName;
 
         file.mv(uploadPath, (err) => {
             if (err) {
