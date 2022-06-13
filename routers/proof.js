@@ -6,6 +6,7 @@ const { count } = require('../models/proofModel')
 const router = express.Router()
 
 
+
 const  bodauTiengViet = function (str) {
     if (str != null) {
         str = str.toString();
@@ -184,6 +185,23 @@ router.post('/proof/filter', async (req, res) => {
     }
 })
 
+router.get("/getFile/:id", async (req, res) => {
+    try{
+        var idProof = req.params.id;
 
+        const recordProof = await Proof.findOne({"_id": Object(idProof)});
+        
+        if(recordProof && recordProof.attachment &&  recordProof.attachment[0].path){
+            res.download(recordProof.attachment[0].path);
+        } else {
+            res.status(404).send("Không tìm thấy file")
+        }
+    
+    } catch (error) {
+        res.status(400).send(error)
+    }
+
+
+})
 
 module.exports = router

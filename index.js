@@ -38,12 +38,10 @@ app.post("/upload/file", (req, res) => {
                     size: file.size,
                     path: uploadPath
                 }
-                // res.json({
-                //     message: "File uploaded",
-                //     dataFile: dataFile
-                // })
-                res.download(uploadPath)
-
+                res.json({
+                    message: "File uploaded",
+                    dataFile: dataFile
+                })
             }
         })
     }
