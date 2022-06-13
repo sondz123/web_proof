@@ -5,12 +5,14 @@ const app = express();
 
 app.get('/', (req, res) => {
   res.send(`
-    <h2>With <code>"express"</code> npm package</h2>
-    <form action="/api/upload" enctype="multipart/form-data" method="post">
-      <div>Text field title: <input type="text" name="title" /></div>
-      <div>File: <input type="file" name="someExpressFiles" multiple="multiple" /></div>
-      <input type="submit" value="Upload" />
-    </form>
+
+  <html>
+  <head></head>
+  <body>
+      <a href="#" onclick="window.open('D:\\web_proof/uploads/CMCG-Nodejs-VU_VAN_MUNG-1.docx'); return false">CLICK ME</a>
+  </body>
+  <footer></footer>
+</html>
   `)
 });
 
@@ -28,7 +30,7 @@ app.post('/api/upload', (req, res, next) => {
   });
 });
 
-app.listen(3000, () => {
+app.listen(8080, () => {
   console.log('Server listening on http://localhost:3000 ...');
 });
 
