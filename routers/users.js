@@ -87,7 +87,7 @@ router.get('/users/getall', async(req, res) => {
     }
 })
 
-//Xóa minh chứng
+//Xóa user
 router.delete('/users/delete/:id', async (req, res) => {
     try {
         let idUser = req.params.id;

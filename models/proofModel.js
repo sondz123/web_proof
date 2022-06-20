@@ -8,7 +8,7 @@ const proofSchema = mongoose.Schema({
     },
     code: {
         type: String,
-        trim: true
+        trim: true,
     },
     cap_ban_hanh: {
         type: Object,
@@ -19,7 +19,8 @@ const proofSchema = mongoose.Schema({
         trim: true
     },
     ngay_ban_hanh: {
-        type: {type: Date, default: Date.now} 
+        type: Date,
+        default: Date.now,
     },
     ghi_chu: {
         type: String,

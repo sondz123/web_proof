@@ -4,10 +4,9 @@ const Proof = require('../models/proofModel')
 const countRecordModel = require('../models/countRecord')
 const { count } = require('../models/proofModel')
 const router = express.Router()
+const ObjectID = require('mongodb').ObjectId
 
-
-
-const  bodauTiengViet = function (str) {
+const bodauTiengViet = function (str) {
     if (str != null) {
         str = str.toString();
         str = str.toLowerCase();
@@ -26,65 +25,70 @@ const  bodauTiengViet = function (str) {
 
 
 //Lấy danh sách minh chứng  
-router.post('/proof/list', async(req, res, next) => {
+router.post('/proof/list', async (req, res, next) => {
     try {
         //dieu kien loc
         let perPage = req.body.perPage || 10; // số lượng sản phẩm xuất hiện trên 1 page
-        let page = req.body.page || 1; 
+        let page = req.body.page || 1;
 
 
         let name = req.body.name;
-        
+
         var optionFind = {};
 
-        if(req.body.name){
-            optionFind["namekd"] = {"$regex": bodauTiengViet(name)};
+        if (req.body.name) {
+            optionFind["namekd"] = { "$regex": bodauTiengViet(name) };
         }
-        if(req.body.cap_ban_hanh){
+        if (req.body.cap_ban_hanh) {
             optionFind["cap_ban_hanh.key"] = req.body.cap_ban_hanh;
         }
-        if(req.body.don_vi){
+        if (req.body.don_vi) {
             optionFind["don_vi.key"] = req.body.don_vi;
         }
-        if(req.body.nhom_don_vi){
+        if (req.body.nhom_don_vi) {
             optionFind["nhom_don_vi.key"] = req.body.nhom_don_vi;
         }
-        if(req.body.tieu_chuan){
+        if (req.body.tieu_chuan) {
             optionFind["$or"] = [
-                { "block_tieu_chuan_1.tieu_chuan.key" : req.body.tieu_chuan },
-                { "block_tieu_chuan_2.tieu_chuan.key" : req.body.tieu_chuan },
-                { "block_tieu_chuan_3.tieu_chuan.key" : req.body.tieu_chuan }
-             ]
+                { "block_tieu_chuan_1.tieu_chuan.key": req.body.tieu_chuan },
+                { "block_tieu_chuan_2.tieu_chuan.key": req.body.tieu_chuan },
+                { "block_tieu_chuan_3.tieu_chuan.key": req.body.tieu_chuan }
+            ]
         }
-        if(req.body.tieu_chi){
+        if (req.body.tieu_chi) {
             optionFind["$and"] = [
-                {"$or" : [
-                    {"block_tieu_chuan_1.tieu_chi.key" : req.body.tieu_chi},
-                    {"block_tieu_chuan_2.tieu_chi.key" : req.body.tieu_chi},
-                    {"block_tieu_chuan_3.tieu_chi.key" : req.body.tieu_chi}
-                ]}
+                {
+                    "$or": [
+                        { "block_tieu_chuan_1.tieu_chi.key": req.body.tieu_chi },
+                        { "block_tieu_chuan_2.tieu_chi.key": req.body.tieu_chi },
+                        { "block_tieu_chuan_3.tieu_chi.key": req.body.tieu_chi }
+                    ]
+                }
             ]
         }
 
-        await Proof.find(optionFind).sort({"createdAt" : -1})
-       .skip((perPage * page) - perPage) 
-       .limit(perPage)
-       .exec((err, listProof) => {
-        Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
-            if (err) return next(err);
-            
-            let ObjResult = {
-                "total" : count,
-                "listProof" : listProof,
-                
-            }
-            res.status(200).json(ObjResult) 
-          });
-       });
-    }catch(error){
+        await Proof.find(optionFind).sort({ "createdAt": -1 })
+            .skip((perPage * page) - perPage)
+            .limit(perPage)
+            .exec((err, listProof) => {
+
+                console.log(err)
+
+                Proof.countDocuments((err, count) => { // đếm để tính có bao nhiêu trang
+                    if (err) return next(err);
+
+                    let ObjResult = {
+                        "total": count,
+                        "listProof": listProof,
+
+                    }
+                    res.status(200).json(ObjResult)
+                });
+            });
+    } catch (error) {
         res.send(error)
     }
-   
+
 })
 
 //Tạo minh chứng
@@ -93,10 +97,10 @@ router.post('/proof/create', async (req, res) => {
     try {
         let countRecord = await countRecordModel.findOne({})
         let count = 1;
-        if(countRecord){
+        if (countRecord) {
             count = countRecord.count
-        }else {
-            const countRecord = new countRecordModel({"count" : 1})
+        } else {
+            const countRecord = new countRecordModel({ "count": 1 })
             await countRecord.save()
         }
 
@@ -108,17 +112,17 @@ router.post('/proof/create', async (req, res) => {
 
 
 
-        proof.code  = ""  + chuonng_trinh + "." + tieu_chuan + "." + tieu_chi + "." + count ;
-        
-        Promise.all([await proof.save(), await countRecordModel.updateOne({}, {$set : {count : count + 1}})])
-        
-        res.status(201).json({ 
-         data: proof,
-         message : "Thêm mới thành công"
+        proof.code = "" + chuonng_trinh + "." + tieu_chuan + "." + tieu_chi + "." + count;
+
+        Promise.all([await proof.save(), await countRecordModel.updateOne({}, { $set: { count: count + 1 } })])
+
+        res.status(201).json({
+            data: proof,
+            message: "Thêm mới thành công"
         })
     } catch (error) {
         console.log(error)
-        res.status(400).send({message : error})
+        res.status(400).send({ message: error })
     }
 })
 
@@ -129,11 +133,15 @@ router.put('/proof/update/:id', async (req, res) => {
         let idProof = req.params.id;
 
         var ObjProof = req.body;
-        
-        await Proof.updateOne({_id : Object(idProof)}, {"$set" : ObjProof})
-        res.status(201).send("Update thành công")
+
+        await Proof.updateOne({_id: ObjectID(idProof)},{$set : ObjProof} )
+        res.status(200).send("Update thành công")
+
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).json({
+            status : 'fail',
+            message: "Cập nhật thất bại"
+        })
     }
 })
 
@@ -143,7 +151,7 @@ router.delete('/proof/delete/:id', async (req, res) => {
     try {
         let idProof = req.params.id;
 
-        await Proof.remove({"_id": Object(idProof)})
+        await Proof.remove({ "_id": Object(idProof) })
         res.status(201).send("Xóa thành công")
     } catch (error) {
         res.status(400).send(error)
@@ -157,28 +165,30 @@ router.post('/proof/filter', async (req, res) => {
         let tieu_chuan = req.body.tieu_chuan;
         let chuong_trinh = req.body.chuong_trinh;
         let optionFind = {};
-        
 
-        if(tieu_chuan){
+
+        if (tieu_chuan) {
             optionFind["$or"] = [
-                { "block_tieu_chuan_1.tieu_chuan.key" : req.body.tieu_chuan },
-                { "block_tieu_chuan_2.tieu_chuan.key" : req.body.tieu_chuan },
-                { "block_tieu_chuan_3.tieu_chuan.key" : req.body.tieu_chuan }
-             ]
-        }
-        if(tieu_chi){
-            optionFind["$and"] = [
-                {"$or" : [
-                    {"block_tieu_chuan_1.tieu_chi.key" : tieu_chi},
-                    {"block_tieu_chuan_2.tieu_chi.key" : tieu_chi},
-                    {"block_tieu_chuan_3.tieu_chi.key" : tieu_chi}
-                ]}
+                { "block_tieu_chuan_1.tieu_chuan.key": req.body.tieu_chuan },
+                { "block_tieu_chuan_2.tieu_chuan.key": req.body.tieu_chuan },
+                { "block_tieu_chuan_3.tieu_chuan.key": req.body.tieu_chuan }
             ]
         }
-        if(chuong_trinh){
+        if (tieu_chi) {
+            optionFind["$and"] = [
+                {
+                    "$or": [
+                        { "block_tieu_chuan_1.tieu_chi.key": tieu_chi },
+                        { "block_tieu_chuan_2.tieu_chi.key": tieu_chi },
+                        { "block_tieu_chuan_3.tieu_chi.key": tieu_chi }
+                    ]
+                }
+            ]
+        }
+        if (chuong_trinh) {
             optionFind["chuong_trinh.key"] = chuong_trinh;
         }
-        let list  = await Proof.find(optionFind).sort({"createdAt" : -1})
+        let list = await Proof.find(optionFind).sort({ "createdAt": -1 })
         res.status(201).send(list)
     } catch (error) {
         res.status(400).send(error)
@@ -186,17 +196,17 @@ router.post('/proof/filter', async (req, res) => {
 })
 
 router.get("/getFile/:id", async (req, res) => {
-    try{
+    try {
         var idProof = req.params.id;
 
-        const recordProof = await Proof.findOne({"_id": Object(idProof)});
-        
-        if(recordProof && recordProof.attachment &&  recordProof.attachment[0].path){
-            res.download(recordProof.attachment[0].path);
+        const recordProof = await Proof.findOne({ "_id": Object(idProof) });
+
+        if (recordProof && recordProof.attachment && recordProof.attachment[0].path) {
+            res.sendFile(recordProof.attachment[0].path);
         } else {
             res.status(404).send("Không tìm thấy file")
         }
-    
+
     } catch (error) {
         res.status(400).send(error)
     }
